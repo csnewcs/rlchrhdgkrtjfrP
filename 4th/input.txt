@@ -1,0 +1,12 @@
+\abstract{
+Recently, the technologies of On-device AI have been accelerated with the development of new hardware and software platforms. 
+Therefore, many researchers and engineers focus on how to enable ML technologies on mobile devices with limited hardware resources.
+In this paper, we revisit On-device ML designed to support ML technologies on mobile devices and describe the three challenges when using On-device ML in detail. 
+Then, we propose a new data management policy, called \oml, that efficiently solves two challenges that we discovered. 
+Especially, we designed \oml to work in the application space with two key ideas.
+The first key idea is to extend the limited memory space using the usable space of the underlying storage device.
+The second key idea is to provide data transparency, which hides where the data is stored so that running ML models think the data is stored in the same place.
+For evaluation, we implemented an image detection application based on TensorFlow Lite which is a well-known On-device ML framework, and modified it to enable the features of \oml.
+All evaluation was performed on two state-of-the-art smartphones that are high-end embedded devices.
+Our evaluation results clearly show \oml can effectively prevent unexpected termination by Android OS and present a good loss value in real-world workload.
+}
