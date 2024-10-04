@@ -3,7 +3,7 @@ csnewcs@fedora
 OS: Fedora Linux 40 (Workstation Edition) x86_64 
 Host: Bravo 15 A4DDR REV:1.0 
 Kernel: 6.10.11-200.fc40.x86_64 
-Uptime: 1 hour, 11 mins 
+Uptime: 1 hour, 26 mins 
 Packages: 2660 (rpm), 26 (flatpak) 
 Shell: zsh 5.9 
 Resolution: 1920x1080, 2560x1600 
@@ -16,5 +16,5 @@ Terminal: vscode
 CPU: AMD Ryzen 7 4800H with Radeon Graphics (16) @ 2.900GHz 
 GPU: AMD ATI Radeon Vega Series / Radeon Vega Mobile Series 
 GPU: AMD ATI Radeon RX 5500/5500M / Pro 5500M 
-Memory: 5505MiB / 21900MiB 
+Memory: 5496MiB / 21900MiB 
 

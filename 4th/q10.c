@@ -19,7 +19,7 @@ int findStringArrayLength(char**, int);
 */
 int main()
 {
-    printf("====================\n의존성: zsh, neofetch\n====================\n");
+    printf("====================\n의존성: sh, neofetch\n주의! CPU정보를 정상적으로 가져오지 못할 경우(vCPU 사용 등) 제대로 된 결과가 나오지 않습니다!\n====================\n");
     // Neofetch 실행
     pid_t pid = fork();
     if(pid == 0) { //자식 프로세스의 시작점 -> pid == 0
@@ -49,6 +49,7 @@ int main()
     char** cpuInfo = splitStr(cpu, " ");
     int cpuInfoSize = findStringArrayLength(cpuInfo, cpuStringSize);
     
+    printf("CPU 정보\n");
     printf("제조사: %s\n", cpuInfo[0]);
     printf("코어수: %s\n", cpuInfo[cpuInfoSize - 3]);
     printf("클럭: %s\n", cpuInfo[cpuInfoSize - 1]);
@@ -59,7 +60,7 @@ int main()
 void executeNeofetch() {
     FILE *fp = fopen("./neofetch.txt", "w"); // 혹여 zsh가 설치되어 있지 않을 때 Segmentation fault 방지
     fclose(fp);
-    execlp("zsh", "zsh", "-c", "neofetch --stdout > ./neofetch.txt", NULL);
+    execlp("sh", "sh", "-c", "neofetch --stdout > ./neofetch.txt", NULL);
 }
 int* readFile() {
     FILE *fp = fopen("./neofetch.txt", "r");
