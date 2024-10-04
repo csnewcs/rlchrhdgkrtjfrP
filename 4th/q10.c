@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
+void executeNeofetch();
+int* readFile();
+char** splitStr(char*, char*);
+int whereStartWith();
+int startWith();
+int findStringArrayLength(char**, int);
+
+/*
+프로그램 설명
+1. Neofetch를 통해 시스템 정보를 얻고
+2. 해당 정보에서 CPU이름을 빼낸 다음
+3. 제조사[0], 코어수[끝 - 2], 클럭[끝]을 출력한다
+*/
+int main()
+{
+    printf("====================\n의존성: zsh, neofetch\n====================\n");
+    // Neofetch 실행
+    pid_t pid = fork();
+    if(pid == 0) { //자식 프로세스의 시작점 -> pid == 0
+        executeNeofetch();
+        return 0;
+    }
+    printf("프로세스가 종료되길 기다리는 중....(PID: %d)\n\n", pid);
+
+    waitpid(pid, NULL, 0);
+    // Neofetch 종료 후 파일 읽기
+    int* neofetch = readFile();
+    if(neofetch[0] == 0) {
+        printf("The result of executing neofetch is EMPTY. Are dependencies not installed?\n");
+        return 1;
+    }
+    // CPU 이름 찾기
+    char** lines = splitStr((char *)neofetch, "\n")
+    ;
+    int cpuIndex = whereStartWith(lines, "CPU: ");
+    int cpuStringSize = strlen(lines[cpuIndex]) - 5;
+
+    char* cpu = calloc(cpuStringSize, sizeof(char)); // CPU 이름만 가져오기
+    strcpy(cpu, lines[cpuIndex] + 5);
+    cpu[strlen(cpu) - 1] = '\0'; // 마지막에 있는 ' ' 제거
+    
+    // CPU정보 출력
+    char** cpuInfo = splitStr(cpu, " ");
+    int cpuInfoSize = findStringArrayLength(cpuInfo, cpuStringSize);
+    
+    printf("제조사: %s\n", cpuInfo[0]);
+    printf("코어수: %s\n", cpuInfo[cpuInfoSize - 3]);
+    printf("클럭: %s\n", cpuInfo[cpuInfoSize - 1]);
+
+    return 0;
+}
+
+void executeNeofetch() {
+    FILE *fp = fopen("./neofetch.txt", "w"); // 혹여 zsh가 설치되어 있지 않을 때 Segmentation fault 방지
+    fclose(fp);
+    execlp("zsh", "zsh", "-c", "neofetch --stdout > ./neofetch.txt", NULL);
+}
+int* readFile() {
+    FILE *fp = fopen("./neofetch.txt", "r");
+    static int neofetch[5000] = {0};
+    fread(neofetch, 1, 5000, fp);
+    fclose(fp);
+    return neofetch;
+}
+char** splitStr(char* str, char* delim) {
+    static char* lines[1000];
+    int i = 0;
+    char* token = strtok(str, delim);
+    while(token != NULL) {
+        lines[i] = token;
+        token = strtok(NULL, delim);
+        i++;
+    }
+    return lines;
+}
+int whereStartWith(char** str, char* prefix) {
+    for(int i = 0; i < 1000; i++) {
+        if(startWith(str[i], prefix)) {
+            return i;
+        }
+    }
+    return -1;
+}
+int startWith(char* str, char* prefix) {
+    return strncmp(str, prefix, strlen(prefix)) == 0;
+}
+int findStringArrayLength(char** str, int endIndex) {
+    int count = 0;
+    for(int i = 0; i < endIndex; i++) {
+        char c = str[0][i];
+        if(c == '\0') {
+            count++;
+        }
+    }
+    return count;
+}
