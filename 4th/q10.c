@@ -36,8 +36,7 @@ int main()
         return 1;
     }
     // CPU 이름 찾기
-    char** lines = splitStr((char *)neofetch, "\n")
-    ;
+    char** lines = splitStr((char *)neofetch, "\n");
     int cpuIndex = whereStartWith(lines, "CPU: ");
     int cpuStringSize = strlen(lines[cpuIndex]) - 5;
 
