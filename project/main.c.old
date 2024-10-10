@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include "./GetSpecs.c"
 
 void executeNeofetch();
 int* readFile();
