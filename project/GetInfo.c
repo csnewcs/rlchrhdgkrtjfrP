@@ -6,7 +6,7 @@ typedef struct {
     char* info;
 } Info;
 
-int* getInfo();
+char* getInfo();
 Info GetCpuInfo() {
     const char* COMMAND = "lscpu";
     Info info ={"CPU", getInfo(COMMAND)};
@@ -29,7 +29,7 @@ Info GetOsInfo() {
     Info info ={"OS", getInfo(COMMAND)};
     return info;
 }
-int* getInfo(char* command) {
+char* getInfo(char* command) {
     FILE* fp = popen(command, "r");
     if(fp == NULL) {
         return NULL;

@@ -2,12 +2,16 @@
 #include <stdarg.h>
 #include <strings.h>
 #include <string.h>
+#include <unistd.h>
 #include "GetInfo.c"
 
 char* makeHtml(int, ...);
 char* replace(char*, char*, char*);
 
 int main() {
+    printf("Dependencies: xdg-open, lscpu, lsblk, lsmem, lsb_release\n");
+    printf("Generating system information...\n");
+
     Info cpuInfo = GetCpuInfo();
     Info memoryInfo = GetMemoryInfo();
     Info partitionInfo = GetPartitionInfo();
@@ -17,6 +21,8 @@ int main() {
     FILE* fp = fopen("index.html", "w");
     fprintf(fp, "%s", html);
     fclose(fp);
+    printf("Saved to index.html\n");
+    execlp("xdg-open", "xdg-open", "index.html", NULL);
     return 0;
 }
 
@@ -28,7 +34,6 @@ char* makeHtml(int argCount, ...) {
             <title>System Information</title>\n \
             <script> \
                 let radioButtonOnClick = () => { \
-                    alert('it works'); \
                     let tabs = document.getElementsByClassName(\"tab\"); \
                     let tabContents = document.getElementsByClassName(\"tab_content\"); \
                     for(let i = 0; i < tabs.length; i++) { \
@@ -42,6 +47,7 @@ char* makeHtml(int argCount, ...) {
             </script> \
         </head>\n \
         <body>\n \
+        <h1>System Information</h1>\n \
         <div id=\"tab_select\">\n");
     char** infos = calloc(argCount, sizeof(char*));
     char* tabFormat = "<input type=\"radio\" onclick=\"radioButtonOnClick()\" class=\"tab\" name=\"tab\" id=\"%s\" />\n<label class=\"tab_label\" for=\"%s\">%s</label>\n";
