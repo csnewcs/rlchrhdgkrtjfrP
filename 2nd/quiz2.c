@@ -23,6 +23,7 @@ void initGame(int chance, int *correctAnswer) {
   printf("Starting Game...\n");
   printf("You have %d chances.\n", chance);
   *correctAnswer = setNumber(1, 50);
+  printf("%d\n", *correctAnswer);
 }
 int setNumber(int min, int max) { return min + (rand() % (max - min)); }
 
@@ -31,7 +32,7 @@ void runGame(int correctAnswer, int chances) {
     int input = getAnswer();
     if (input > 50 || input < 1) {
       printf("Out of Range! You can input only 1~50. This not use chance");
-       continue;
+      continue;
     }
     int upDown = checkCorrect(correctAnswer, input);
     if (!upDown) {
