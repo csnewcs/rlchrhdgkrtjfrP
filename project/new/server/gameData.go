@@ -3,31 +3,55 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"strconv"
 )
 
 type Game struct {
-	Name              string `json: "name"`
-	MinimumCPU        string `json: "minimumCpu"`
-	MinimumCPUScore   int    `json: "minimumCpuScore"`
-	MinimumGPU        string `json: "minimumGpu"`
-	MinimumGPUScore   int    `json: "minimumGpuScore"`
-	RecommendCPU      string `json: "recommendCpu"`
-	RecommendCPUScore int    `json: "recommendCpuScore"`
-	RecommendGPU      string `json: "recommendGpu"`
-	RecommendGPUScore int    `json: "recommendGpuScore"`
+	Name              string `json:"name"`
+	MinimumCPU        string `json:"minimumCpu"`
+	MinimumCPUScore   int    `json:"minimumCpuScore"`
+	MinimumGPU        string `json:"minimumGpu"`
+	MinimumGPUScore   int    `json:"minimumGpuScore"`
+	MinimumMem        int    `json:"minimumMem"`
+	RecommendCPU      string `json:"recommendCpu"`
+	RecommendCPUScore int    `json:"recommendCpuScore"`
+	RecommendGPU      string `json:"recommendGpu"`
+	RecommendGPUScore int    `json:"recommendGpuScore"`
+	RecommendMem      int    `json:"recommendMem"`
 }
 
 type GameFinder struct {
-	Games []Game
+	Games           []Game
+	apiGetCpuName   string
+	apiGetGpuName   string
+	apiGetMedianUrl string
+}
+
+type Cpu3dMark struct {
+	Id    string `json:"id"`
+	Label string `json:"label"`
+	Value string `json:"value"`
+}
+
+type Gpu3dMark struct {
+	Id    string `json:"id"`
+	Label string `json:"label"`
+	Value string `json:"value"`
 }
 
 func NewGameFinder() GameFinder {
 	str, _ := os.ReadFile("./games.json")
 	var games []Game
 	json.Unmarshal(str, &games)
-	fmt.Printf("Unmarshal: %v", games)
-	return GameFinder{games}
+	var gameFinder GameFinder
+	gameFinder.Games = games
+	gameFinder.apiGetCpuName = "https://www.3dmark.com/proxycon/ajax/search/cpuname?term=%s"
+	gameFinder.apiGetGpuName = "https://www.3dmark.com/proxycon/ajax/search/gpuname?term=%s"
+	gameFinder.apiGetMedianUrl = "https://www.3dmark.com/proxycon/ajax/medianscore?test=fs%%20P&cpuId=%s&gpuId=%s&gpuCount=1&gpuType=ALL&deviceType=ALL&storageModel=ALL&showRamDisks=false&memoryChannels=0&country=&scoreType=%s&hofMode=false&showInvalidResults=false&freeParams=&minGpuCoreClock=&maxGpuCoreClock=&minGpuMemClock=&maxGpuMemClock=&minCpuClock=&maxCpuClock="
+	return gameFinder
 }
 
 func (gameFinder *GameFinder) GetGameList() string {
@@ -39,17 +63,61 @@ func (gameFinder *GameFinder) GetGameList() string {
 	return str
 }
 
-func (GameFinder *GameFinder) CheckCpuRun(cpuScore int, gameIndex int) int { //0: Not, 1: Bigger than minimum, 2: Yes
+func (gameFinder *GameFinder) GetGame(name string) Game {
+	for _, game := range gameFinder.Games {
+		if game.Name == name {
+			return game
+		}
+	}
+	return Game{}
+}
+func (gameFinder *GameFinder) CheckCpuRun(cpuScore float64, game Game) int { //0: Not, 1: Bigger than minimum, 2: Yes
+
 	return 0
 }
 
-func (gameFinder *GameFinder) GetCpuScore(cpuName string) int {
+func (gameFinder *GameFinder) GetCpuScore(cpuName string) float64 {
+	cpuId := strconv.Itoa(gameFinder.getCpuId(cpuName))
+	url := fmt.Sprintf(gameFinder.apiGetMedianUrl, cpuId, "", "physicsScore")
+	fmt.Println(url)
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0")
+	client := &http.Client{}
+	result, _ := client.Do(req)
+	// result, _ := http.Get(url)
+	var data map[string]interface{}
+
+	defer result.Body.Close()
+	str, _ := io.ReadAll(result.Body)
+	fmt.Printf("%s\n", str)
+	json.NewDecoder(result.Body).Decode(&data)
+	for key, value := range data {
+		fmt.Println(key, value)
+	}
 	return 0
 }
 
-func (gameFinder *GameFinder) CheckGpuRun(gpuScore int, gameIndex int) int {
+func (gameFinder *GameFinder) getCpuId(cpuName string) int {
+	url := fmt.Sprintf(gameFinder.apiGetCpuName, cpuName)
+	println(url)
+	result, _ := http.Get(url)
+	var data []Cpu3dMark
+	str, _ := io.ReadAll(result.Body)
+	json.Unmarshal(str, &data)
+	fmt.Println("===========================DATA===========================")
+	for _, value := range data {
+		if value.Label == cpuName {
+			id, _ := strconv.Atoi(value.Id)
+			return id
+		}
+	}
+	id, _ := strconv.Atoi(data[0].Id)
+	return id
+}
+
+func (gameFinder *GameFinder) CheckGpuRun(gpuScore float64, game Game) int {
 	return 0
 }
-func (gameFinder *GameFinder) GetGpuScore(gpuName string, gameIndex int) int {
+func (gameFinder *GameFinder) GetGpuScore(gpuName string) int {
 	return 0
 }

@@ -2,12 +2,12 @@
   {
     "name": "Minecraft JE",
     "minimumCpu": "Intel Core i3-3210 3.2GHz",
-    "minimumCpuScore": 4491,
+    "minimumCpuScore": 4732,
     "minimumGpu": "Intel HD Graphics 4000",
     "minimumGpuScore": 996,
     "minimumMem": 2,
     "recommendCpu": "Intel Core i5-4690 3.5GHz",
-    "recommendCpuScore": 7355,
+    "recommendCpuScore": 7303,
     "recommendGpu": "NVIDIA GeForce 700 series",
     "recommendGpuScore": 1105,
     "recommendMem": 4
@@ -15,14 +15,14 @@
   {
     "name": "PUBG",
     "minimumCpu": "Intel Core i5-4430",
-    "minimumCpuScore": 0,
+    "minimumCpuScore": 5960,
     "minimumGpu": "NVIDIA GeForce GTX 960 2GB",
-    "minimumGpuScore": 2300,
+    "minimumGpuScore": 7702,
     "minimumMem": 8,
     "recommendCpu": "Intel Core i5-6600K",
-    "recommendCpuScore": 0,
+    "recommendCpuScore": 9081,
     "recommendGpu": "NVIDIA GeForce GTX 1060 3GB",
-    "recommendGpuScore": 3863,
+    "recommendGpuScore": 12266,
     "recommendMem": 16
   }
 ]

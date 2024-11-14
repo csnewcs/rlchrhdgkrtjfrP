@@ -21,6 +21,7 @@
 |/cpuname|CPU이름으로 ID 가져오기|term={검색할 이름}|[{id: ID, label: CPU 이름, label: CPU 이름},...]||
 |/gpuname|GPU이름으로 ID 가져오기|동일|동일||
 |/newsearch|벤치마크 결과 검색|test=spy P&cpuId={CPU ID}&gpuId={GPU ID}&gpuCount=0&gpuType=ALL&deviceType=ALL&storageModel=ALL&showRamDisks=false&memoryChannels=0&country=&scoreType=overallScore&hofMode=false&showInvalidResults=false&freeParams=&minGpuCoreClock=&maxGpuCoreClock=&minGpuMemClock=&maxGpuMemClock=&minCpuClock=&maxCpuClock=|{results:[{resultId: 결과 ID, rank: 순위, test: 테스트한 벤치마크, gpuCount: GPU 개수, date: 테스트 일시(string), cpu: cpu이름, gpu: gpu이름, country: 국가, overallScore: 전체 점수, graphicScore: 그래픽 스코어, physicsScore: CPU 스코어}]}|cpuId, gpuId 없어도 가져올 수 있음|
+|/proxycon/ajax/medianscore|test=fs P&cpuId=&gpuId=1010&gpuCount=1&gpuType=ALL&deviceType=ALL&storageModel=ALL&showRamDisks=false&memoryChannels=0&country=&scoreType=graphicsScore&hofMode=false&showInvalidResults=false&freeParams=&minGpuCoreClock=&maxGpuCoreClock=&minGpuMemClock=&maxGpuMemClock=&minCpuClock=&maxCpuClock=|
 
 # API(C에서 응답을 주고 받아야 하니 최대한 단순하게)
 - 모든 요청은 GET으로
