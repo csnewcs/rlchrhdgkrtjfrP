@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type Game struct {
@@ -24,7 +25,8 @@ type Game struct {
 }
 
 type GameFinder struct {
-	Games           []Game
+	Games []Game
+	// apiSession      string
 	apiGetCpuName   string
 	apiGetGpuName   string
 	apiGetMedianUrl string
@@ -51,8 +53,21 @@ func NewGameFinder() GameFinder {
 	gameFinder.apiGetCpuName = "https://www.3dmark.com/proxycon/ajax/search/cpuname?term=%s"
 	gameFinder.apiGetGpuName = "https://www.3dmark.com/proxycon/ajax/search/gpuname?term=%s"
 	gameFinder.apiGetMedianUrl = "https://www.3dmark.com/proxycon/ajax/medianscore?test=fs%%20P&cpuId=%s&gpuId=%s&gpuCount=1&gpuType=ALL&deviceType=ALL&storageModel=ALL&showRamDisks=false&memoryChannels=0&country=&scoreType=%s&hofMode=false&showInvalidResults=false&freeParams=&minGpuCoreClock=&maxGpuCoreClock=&minGpuMemClock=&maxGpuMemClock=&minCpuClock=&maxCpuClock="
+	// gameFinder.apiSession = getSession()
 	return gameFinder
 }
+
+// func getSession() string { //Session을 주지 않으면 proxycon의 median부분이 동작하지 않음(406 Not Acceptable)
+// 	url := "https://www.3dmark.com/search"
+// 	result, _ := http.Get(url)
+// 	for _, value := range result.Cookies() {
+// 		if value.Name == "FM_PROXYCON_SESSION" {
+// 			fmt.Println(value.Value)
+// 			return value.Value
+// 		}
+// 	}
+// 	return ""
+// }
 
 func (gameFinder *GameFinder) GetGameList() string {
 	str := ""
@@ -72,8 +87,12 @@ func (gameFinder *GameFinder) GetGame(name string) Game {
 	return Game{}
 }
 func (gameFinder *GameFinder) CheckCpuRun(cpuScore float64, game Game) int { //0: Not, 1: Bigger than minimum, 2: Yes
-
-	return 0
+	if cpuScore < float64(game.MinimumCPUScore) {
+		return 0
+	} else if cpuScore < float64(game.RecommendCPUScore) {
+		return 1
+	}
+	return 2
 }
 
 func (gameFinder *GameFinder) GetCpuScore(cpuName string) float64 {
@@ -82,29 +101,36 @@ func (gameFinder *GameFinder) GetCpuScore(cpuName string) float64 {
 	fmt.Println(url)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0")
+	// sessionCookie := http.Cookie{
+	// 	Name:  "FM_PROXYCON_SESSION",
+	// 	Value: gameFinder.apiSession,
+	// }
+	// req.Header.Add("Cookie", sessionCookie.String())
+	req.Header.Add("Accept", "application/json, text/javascript, */*; q=0.01")
 	client := &http.Client{}
 	result, _ := client.Do(req)
 	// result, _ := http.Get(url)
-	var data map[string]interface{}
+	var data map[string]float64
 
 	defer result.Body.Close()
 	str, _ := io.ReadAll(result.Body)
 	fmt.Printf("%s\n", str)
-	json.NewDecoder(result.Body).Decode(&data)
+	json.Unmarshal(str, &data)
 	for key, value := range data {
 		fmt.Println(key, value)
 	}
-	return 0
+	return data["median"]
 }
 
 func (gameFinder *GameFinder) getCpuId(cpuName string) int {
 	url := fmt.Sprintf(gameFinder.apiGetCpuName, cpuName)
-	println(url)
+	url = strings.ReplaceAll(url, " ", "%20")
+	fmt.Println(url)
 	result, _ := http.Get(url)
 	var data []Cpu3dMark
 	str, _ := io.ReadAll(result.Body)
+	fmt.Printf("%s\n", str)
 	json.Unmarshal(str, &data)
-	fmt.Println("===========================DATA===========================")
 	for _, value := range data {
 		if value.Label == cpuName {
 			id, _ := strconv.Atoi(value.Id)
