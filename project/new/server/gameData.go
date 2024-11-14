@@ -142,8 +142,58 @@ func (gameFinder *GameFinder) getCpuId(cpuName string) int {
 }
 
 func (gameFinder *GameFinder) CheckGpuRun(gpuScore float64, game Game) int {
-	return 0
+	if gpuScore < float64(game.MinimumGPUScore) {
+		return 0
+	} else if gpuScore < float64(game.RecommendGPUScore) {
+		return 1
+	}
+	return 2
 }
-func (gameFinder *GameFinder) GetGpuScore(gpuName string) int {
-	return 0
+func (gameFinder *GameFinder) GetGpuScore(gpuName string) float64 {
+	gpuId := strconv.Itoa(gameFinder.getGpuId(gpuName))
+	url := fmt.Sprintf(gameFinder.apiGetMedianUrl, "", gpuId, "graphicsScore")
+	fmt.Println(url)
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0")
+	req.Header.Add("Accept", "application/json, text/javascript, */*; q=0.01")
+	client := &http.Client{}
+	result, _ := client.Do(req)
+	// result, _ := http.Get(url)
+	var data map[string]float64
+
+	defer result.Body.Close()
+	str, _ := io.ReadAll(result.Body)
+	fmt.Printf("%s\n", str)
+	json.Unmarshal(str, &data)
+	for key, value := range data {
+		fmt.Println(key, value)
+	}
+	return data["median"]
+}
+func (gameFinder *GameFinder) getGpuId(gpuName string) int {
+	url := fmt.Sprintf(gameFinder.apiGetGpuName, gpuName)
+	url = strings.ReplaceAll(url, " ", "%20")
+	fmt.Println(url)
+	result, _ := http.Get(url)
+	var data []Cpu3dMark
+	str, _ := io.ReadAll(result.Body)
+	fmt.Printf("%s\n", str)
+	json.Unmarshal(str, &data)
+	for _, value := range data {
+		if value.Label == gpuName {
+			id, _ := strconv.Atoi(value.Id)
+			return id
+		}
+	}
+	id, _ := strconv.Atoi(data[0].Id)
+	return id
+}
+
+func (gameFinder *GameFinder) CheckMemRun(memSize int, game Game) int {
+	if memSize < game.MinimumMem {
+		return 0
+	} else if memSize < game.RecommendMem {
+		return 1
+	}
+	return 2
 }

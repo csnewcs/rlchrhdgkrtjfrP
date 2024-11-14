@@ -4,7 +4,7 @@
     "minimumCpu": "Intel Core i3-3210 3.2GHz",
     "minimumCpuScore": 4732,
     "minimumGpu": "Intel HD Graphics 4000",
-    "minimumGpuScore": 996,
+    "minimumGpuScore": 481,
     "minimumMem": 2,
     "recommendCpu": "Intel Core i5-4690 3.5GHz",
     "recommendCpuScore": 7303,
