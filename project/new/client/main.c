@@ -1,3 +1,18 @@
-//CPU 이름 가져오기: /proc/cpuinfo의 model name 부분
-//메모리 용량 가져오기: free --giga -h 에서 Mem: 부분 중 첫 번째(total)
-//GPU 이름 가져오기: lshw -C display에서 product 부분"들" 중 대괄호 안 (바깥은 GPU 코어 이름, NAVI14와 같은)
+// CPU 이름 가져오기: /proc/cpuinfo의 model name 부분
+// 메모리 용량 가져오기: free --giga -h 에서 Mem: 부분 중 첫 번째(total)
+// GPU 이름 가져오기: lshw -C display에서 product 부분"들" 중 대괄호 안 (바깥은
+// GPU 코어 이름, NAVI14와 같은)
+
+#include "./GetInfo.c"
+#include "./PrettyOut.c"
+#include <stdio.h>
+int main() {
+  initConsole();
+  Info cpuInfo = GetCpuInfo();
+  Info gpuInfo = GetGpuInfo();
+  Info memInfo = GetMemoryInfo();
+  if (printSpec(cpuInfo.info, "TEST GPU", memInfo.info)) {
+    return 1;
+  }
+
+}
