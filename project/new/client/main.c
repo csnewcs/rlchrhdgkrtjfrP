@@ -6,13 +6,40 @@
 #include "./GetInfo.c"
 #include "./PrettyOut.c"
 #include <stdio.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <termios.h>
+
+void* mainFuncThread(); // main함수는 사용자의 key입력(q 등)을 받고 그간 다른 작업은 mainFuncThread에서 수행
 int main() {
   initConsole();
+  int printRunning = 1;
+  pthread_t print;
+  pthread_t mainFunc;
+  pthread_create(&print, NULL, printThread, &printRunning);
+  pthread_create(&mainFunc, NULL, mainFuncThread, NULL);
+  char input;
+  while(1) {
+    input = getchar();
+    if(input == 'q') {
+      break;
+    }
+  }
+  printRunning = 0;
+  pthread_join(print, NULL);
+  printf("q inputed... Exiting\n");
+  pthread_join(mainFunc, NULL);
+  sleep(3);
+  RELEASE_CONSOLE();
+  tcsetattr(STDIN_FILENO, TCSANOW, &term);
+}
+void* mainFuncThread() {
   Info cpuInfo = GetCpuInfo();
   Info gpuInfo = GetGpuInfo();
   Info memInfo = GetMemoryInfo();
   if (printSpec(cpuInfo.info, "TEST GPU", memInfo.info)) {
-    return 1;
+    FILE *fp = fopen(STDIN_FILENO, "w");
+    fprintf(fp, "q");
   }
-
+  return 0;
 }
