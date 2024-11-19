@@ -4,24 +4,29 @@
 // GPU 코어 이름, NAVI14와 같은)
 
 #include "./GetInfo.c"
+#include "./Internet.h"
 #include "./PrettyOut.c"
-#include <stdio.h>
-#include <unistd.h>
 #include <pthread.h>
+#include <stdio.h>
 #include <termios.h>
+#include <unistd.h>
 
-void* mainFuncThread(); // main함수는 사용자의 key입력(q 등)을 받고 그간 다른 작업은 mainFuncThread에서 수행
+void *mainFuncThread(); // main함수는 사용자의 key입력(q 등)을 받고 그간 다른
+                        // 작업은 mainFuncThread에서 수행
 int main() {
   initConsole();
+  InitCurl();
   int printRunning = 1;
   pthread_t print;
   pthread_t mainFunc;
-  pthread_create(&print, NULL, printThread, &printRunning);
-  pthread_create(&mainFunc, NULL, mainFuncThread, NULL);
+  // pthread_create(&print, NULL, printThread, &printRunning);
+  // pthread_create(&mainFunc, NULL, mainFuncThread, NULL);
+  Request req = NewRequest("http://localhost:8080/2", "", NULL, GET);
+  pthread_join(req.RequestThread, NULL);
   char input;
-  while(1) {
+  while (1) {
     input = getchar();
-    if(input == 'q') {
+    if (input == 'q') {
       break;
     }
   }
@@ -33,7 +38,7 @@ int main() {
   RELEASE_CONSOLE();
   tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
-void* mainFuncThread() {
+void *mainFuncThread() {
   Info cpuInfo = GetCpuInfo();
   Info gpuInfo = GetGpuInfo();
   Info memInfo = GetMemoryInfo();
