@@ -1,14 +1,10 @@
+#include "GetInfo.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
-typedef struct {
-  char *infoName;
-  char *info;
-} Info;
-
-char *getInfo();
 char *getLine(char *str, char *startStr);
 Info GetCpuInfo() {
   const char *COMMAND = "cat ./cpuinfo";

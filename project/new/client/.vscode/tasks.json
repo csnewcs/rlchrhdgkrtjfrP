@@ -8,9 +8,8 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "${fileDirname}/*.c",
-                "${fileDirname}/*.h",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}",
+                "${fileDirname}/main",
                 "-lcurl"
             ],
             "options": {

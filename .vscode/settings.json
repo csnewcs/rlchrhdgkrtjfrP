@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "prettyout.h": "c",
+        "stdio.h": "c"
+    }
+}
