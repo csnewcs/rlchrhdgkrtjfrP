@@ -10,7 +10,8 @@
                 "${fileDirname}/*.c",
                 "-o",
                 "${fileDirname}/main",
-                "-lcurl"
+                "-lcurl",
+                "-O0"
             ],
             "options": {
                 "cwd": "${fileDirname}"

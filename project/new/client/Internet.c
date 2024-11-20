@@ -22,7 +22,7 @@ size_t makeGameListBuffer(char *data, size_t size, size_t nmamb,
   memcpy(&(mem->Response[mem->Size]), data, realSize);
   mem->Size += realSize;
   mem->Response[mem->Size] = 0;
-
+  fprintf(stderr, "%s\n", mem->Response);
   extern int gameCount;
   for (int i = 0, j = 0; i < mem->Size; i++, j++) {
     if (mem->Response[i] == '\n') {
@@ -34,11 +34,16 @@ size_t makeGameListBuffer(char *data, size_t size, size_t nmamb,
   }
   extern int step;
   step = 1;
+
   return realSize;
 }
 
 void *performCurl(void *curl_handle) {
   CURLcode res = curl_easy_perform((CURL *)curl_handle);
+  if (res != CURLE_OK) {
+    fprintf(stderr, "curl_easy_perform() failed: %s\n",
+            curl_easy_strerror(res));
+  }
 }
 
 Request NewRequest(char *url, char *content, Header *headers,
@@ -65,7 +70,7 @@ Request NewRequest(char *url, char *content, Header *headers,
   return req;
 }
 void convertUriFormat(char *url) {
-  char temp[600];
+  char temp[600] = {0};
   for (int i = 0, j = 0; url[i]; i++, j++) {
     if (url[i] == ' ') {
       temp[j] = '%';

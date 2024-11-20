@@ -7,6 +7,8 @@
 #define CURSOR_FRONT "\033[C"
 #define CURSOR_BACK "\033[D"
 #define COLOR_RED "\033[31m"
+#define COLOR_YELLOW "\033[33m"
+#define COLOR_BLUE "\033[34m"
 #define COLOR_RESET "\033[0m"
 #define RESET_ALL "\033[0m"
 #define BOLD "\033[1m"
@@ -36,3 +38,4 @@ int printSpec(char *cpuName, char *gpuName,
               char *memSize); // 0: Succeed, 1: Failed
 void *printThread(void *running);
 void setStatusStr();
+int printRequirements(char *serverResponse, int part, char *partName);

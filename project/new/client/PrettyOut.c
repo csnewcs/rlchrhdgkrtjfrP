@@ -92,6 +92,24 @@ int printSpec(char *cpuName, char *gpuName, char *memSize) {
   sprintf(consoleBuffer[5], "%s", seperatorStr);
   return 0;
 }
+
+int printedRequirements = 0;
+int printRequirements(char* serverResponse, int part, char* partName) { //양식: 실행가능성\n최소CPU,최소GPU,최소메모리\n권장CPU,권장GPU,권장메모리 / 0: CPU, 1: GPU, 2: Memory
+  char token = serverResponse[0];
+  if (token == '0') {
+    sprintf(consoleBuffer[6 + part], "%sRequirements: %s%s", COLOR_RED, partName, COLOR_RESET);
+  } else if(token == '1') {
+    sprintf(consoleBuffer[6 + part], "%sRequirements: %s%s", COLOR_YELLOW, partName, COLOR_RESET);
+  } else {
+    sprintf(consoleBuffer[6 + part], "%sRequirements: %s%s", COLOR_BLUE, partName, COLOR_RESET);
+  }
+  printedRequirements++;
+  if(printedRequirements == 3) {
+    step = 3;
+  }
+  return 0;
+
+}
 char *strMultiply(char *str, int num) {
   int strLen = strlen(str);
   char *mult = calloc(sizeof(char), strLen * num);
@@ -113,7 +131,7 @@ void setStatusStr() {
                              "requirements of the selected game");
     break;
   case 3:
-    strcpy(consoleBuffer[0], "Status: DONE!");
+    strcpy(consoleBuffer[0], "Status: DONE! Press 'q' to exit");
     break;
   }
 }
