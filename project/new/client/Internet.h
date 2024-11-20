@@ -20,5 +20,7 @@ typedef struct Request {
 } Request;
 void InitCurl();
 Request NewRequest(char *url, char *content, Header *headers,
-                   enum Method method);
+                   enum Method method,
+                   void (*callbackFunction)(char *, size_t, size_t, void *));
 Response NewResponse(Request *request, char *content);
+void *makeGameListBuffer(char *, size_t, size_t, void *);
