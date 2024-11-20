@@ -3,22 +3,20 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <pthread.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-typedef struct MemoryStruct {
-  char *Response;
-  size_t Size;
-} MemoryStruct;
 
 void InitCurl() {
   CURLcode res;
   curl_global_init(CURL_GLOBAL_DEFAULT);
 }
 extern char **gameListBuffer; // 게임 리스트 버퍼, 게임 선택할 때 사용
-void *makeGameListBuffer(char *data, size_t size, size_t nmamb, void *clientp) {
+size_t makeGameListBuffer(char *data, size_t size, size_t nmamb,
+                          void *clientp) {
   size_t realSize = size * nmamb;
   MemoryStruct *mem = (MemoryStruct *)clientp;
+
   char *res = realloc(mem->Response, mem->Size + realSize + 1);
   mem->Response = res;
   memcpy(&(mem->Response[mem->Size]), data, realSize);
@@ -34,17 +32,19 @@ void *makeGameListBuffer(char *data, size_t size, size_t nmamb, void *clientp) {
     }
     gameListBuffer[gameCount][j] = mem->Response[i];
   }
-  printf("%cDONE!\n", gameListBuffer[1][0]);
   extern int step;
   step = 1;
+  return realSize;
 }
+
 void *performCurl(void *curl_handle) {
   CURLcode res = curl_easy_perform((CURL *)curl_handle);
 }
 
 Request NewRequest(char *url, char *content, Header *headers,
                    enum Method method,
-                   void (*callbackFunction)(char *, size_t, size_t, void *)) {
+                   size_t (*callbackFunction)(char *, size_t, size_t, void *)) {
+  convertUriFormat(url);
   CURL *curl;
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -57,11 +57,24 @@ Request NewRequest(char *url, char *content, Header *headers,
     break;
   }
   pthread_t requestThread;
-  MemoryStruct body = {0};
+  MemoryStruct *body = malloc(sizeof(MemoryStruct));
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, callbackFunction);
-  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&body);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)body);
   pthread_create(&requestThread, NULL, performCurl, (void *)curl);
-
-  Request req = {url, content, NULL, requestThread, method};
+  Request req = {url, content, NULL, requestThread, method, body};
   return req;
+}
+void convertUriFormat(char *url) {
+  char temp[600];
+  for (int i = 0, j = 0; url[i]; i++, j++) {
+    if (url[i] == ' ') {
+      temp[j] = '%';
+      temp[j + 1] = '2';
+      temp[j + 2] = '0';
+      j += 2;
+      continue;
+    }
+    temp[j] = url[i];
+  }
+  strcpy(url, temp);
 }

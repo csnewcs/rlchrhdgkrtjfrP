@@ -1,5 +1,5 @@
-#include <termios.h>
 #include <sys/ioctl.h>
+#include <termios.h>
 
 // ================= 콘솔 제어 문자열과 매크로 =================
 #define CURSOR_UP "\033[A"
@@ -25,7 +25,8 @@
 
 extern struct winsize w;
 extern struct termios term;
-extern int step; // 0: 스펙 확인, 1: 게임 리스트 가져오기 완료 후 선택, 2: 게임 상태 확인, 3: 끝
+extern int step; // 0: 스펙 확인, 1: 게임 리스트 가져오기 완료 후 선택, 2: 게임
+                 // 상태 확인, 3: 끝
 extern int selectedGame;
 extern int gameCount;
 // ================= 기능 함수 헤더 =================
@@ -34,3 +35,4 @@ char *strMultiply(char *str, int num);
 int printSpec(char *cpuName, char *gpuName,
               char *memSize); // 0: Succeed, 1: Failed
 void *printThread(void *running);
+void setStatusStr();

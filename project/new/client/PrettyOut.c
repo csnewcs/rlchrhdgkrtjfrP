@@ -1,9 +1,9 @@
 #include "Prettyout.h"
 
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 // ================= 콘솔 크기 관련 변수 (initConsole에서 초기화)
 // =================
@@ -11,7 +11,7 @@
 char *seperatorStr;
 char *moveCursorToHome;
 char **consoleBuffer; // 출력할 콘솔 버퍼
-char **gameListBuffer; 
+char **gameListBuffer;
 struct winsize w;
 struct termios term;
 
@@ -37,24 +37,26 @@ void initConsole() {
   GET_CONSOLE();
   ERASE_CONSOLE();
   CURSOR_MOVE(1, 1);
-  strcpy(consoleBuffer[0], "Status: Collecting Your System Info...");
-  sprintf(consoleBuffer[1], "%s", seperatorStr);
-  strcpy(consoleBuffer[2],"CPU:");
+  strcpy(consoleBuffer[1], seperatorStr);
+  strcpy(consoleBuffer[2], "CPU:");
   strcpy(consoleBuffer[3], "GPU:");
   strcpy(consoleBuffer[4], "Memory:");
 }
 
-
 void *printThread(void *running) { // main에서 변수 변경하도록
   int *run = (int *)running;
   while (*run) {
-    usleep(1000 * 100); //10fps
+    usleep(1000 * 100); // 10fps
+    setStatusStr();
     ERASE_CONSOLE();
     CURSOR_MOVE(1, 1);
-    if(step == 1) {
-      printf("Selected Game: %d (Press arrow keys and ENTER to select)\n", selectedGame);
-      for(int i = 0; gameListBuffer[i][0] != 0 && i < w.ws_row; i++) {
-        i == selectedGame ? printf("%s%s%s%s\n",UNDERLINE, BOLD, gameListBuffer[i], RESET_ALL) : printf("%s\n", gameListBuffer[i]);
+    if (step == 1) {
+      printf("Selected Game: %d (Press arrow keys and ENTER to select)\n",
+             selectedGame);
+      for (int i = 0; gameListBuffer[i][0] != 0 && i < w.ws_row; i++) {
+        i == selectedGame ? printf("%s%s%s%s\n", UNDERLINE, BOLD,
+                                   gameListBuffer[i], RESET_ALL)
+                          : printf("%s\n", gameListBuffer[i]);
       }
       continue;
     }
@@ -66,31 +68,28 @@ void *printThread(void *running) { // main에서 변수 변경하도록
 
 int printSpec(char *cpuName, char *gpuName, char *memSize) {
   if (cpuName[0] == '\0') {
-    sprintf(consoleBuffer[2],"%sCPU: Could not get CPU information! Exit...%s", COLOR_RED, COLOR_RESET);
+    sprintf(consoleBuffer[2], "%sCPU: Could not get CPU information! Exit...%s",
+            COLOR_RED, COLOR_RESET);
     return 1;
   } else {
     sprintf(consoleBuffer[2], "CPU: %s", cpuName);
   }
-  fflush(stdout);
-  printf(CURSOR_DOWN);
-  printf(moveCursorToHome);
   if (gpuName[0] == '\0') {
-    sprintf(consoleBuffer[3],"%sGPU: Could not get GPU information! Exit...%s", COLOR_RED, COLOR_RESET);
+    sprintf(consoleBuffer[3], "%sGPU: Could not get GPU information! Exit...%s",
+            COLOR_RED, COLOR_RESET);
     return 1;
   } else {
     sprintf(consoleBuffer[3], "GPU: %s", gpuName);
   }
-  fflush(stdout);
-  printf(CURSOR_DOWN);
-  printf(moveCursorToHome);
   if (memSize == 0) {
-    sprintf(consoleBuffer[4],"%sMemory: Could not get Memory information! Exit...%s", COLOR_RED, COLOR_RESET);
+    sprintf(consoleBuffer[4],
+            "%sMemory: Could not get Memory information! Exit...%s", COLOR_RED,
+            COLOR_RESET);
     return 1;
   } else {
     sprintf(consoleBuffer[4], "Memory: %sGB", memSize);
   }
   sprintf(consoleBuffer[5], "%s", seperatorStr);
-  strcpy(consoleBuffer[0], "Status: Getting game list from server...");
   return 0;
 }
 char *strMultiply(char *str, int num) {
@@ -100,4 +99,21 @@ char *strMultiply(char *str, int num) {
     strcpy((mult + (i * strLen)), str);
   }
   return mult;
+}
+void setStatusStr() {
+  switch (step) {
+  case 0:
+    strcpy(consoleBuffer[0], "Status: Collecting your system info...");
+    break;
+  case 1:
+    strcpy(consoleBuffer[0], "Status: Selecting game"); // NOT SHOWN
+    break;
+  case 2:
+    strcpy(consoleBuffer[0], "Status: Checking if your system meets the "
+                             "requirements of the selected game");
+    break;
+  case 3:
+    strcpy(consoleBuffer[0], "Status: DONE!");
+    break;
+  }
 }
