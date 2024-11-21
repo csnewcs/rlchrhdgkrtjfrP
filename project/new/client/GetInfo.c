@@ -9,10 +9,10 @@ char *getLine(char *str, char *startStr);
 Info GetCpuInfo() {
   const char *COMMAND = "cat ./cpuinfo";
   Info info = {"CPU", ""};
-  char* cpuInfo = getInfo(COMMAND);
-  char* cpuName = getLine(cpuInfo, "model name");
-  for(int i = 0; i < strlen(cpuName); i++) {
-    if(cpuName[i] == ':') {
+  char *cpuInfo = getInfo(COMMAND);
+  char *cpuName = getLine(cpuInfo, "model name");
+  for (int i = 0; i < strlen(cpuName); i++) {
+    if (cpuName[i] == ':') {
       info.info = (cpuName + i + 2);
     }
   }
@@ -21,14 +21,15 @@ Info GetCpuInfo() {
 Info GetMemoryInfo() {
   const char *COMMAND = "free --giga -h";
   Info info = {"Memory", ""};
-  char* memInfo = getInfo(COMMAND);
-  char* memSize = getLine(memInfo, "Mem:");
+  char *memInfo = getInfo(COMMAND);
+  char *memSize = getLine(memInfo, "Mem:");
   int originSize = strlen(memSize);
   int i = 0;
-  while (memSize[i] == ' ') i++;
-  for(int j = 0; j < i; j++) {
-    if(memSize[i + j] == ' ') {
-      memSize[j-1] = '\0';
+  while (memSize[i] == ' ')
+    i++;
+  for (int j = 0; j < i; j++) {
+    if (memSize[i + j] == ' ') {
+      memSize[j - 1] = '\0';
       break;
     }
     memSize[j] = memSize[i + j];
@@ -38,7 +39,7 @@ Info GetMemoryInfo() {
 }
 Info GetGpuInfo() {
   const char *COMMAND = "cat ./lshw";
-  Info info = {"GPU", getInfo(COMMAND)};
+  Info info = {"GPU", "NVIDIA Geforce GTX 660"};
   return info;
 }
 char *getInfo(char *command) {

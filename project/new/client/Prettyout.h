@@ -1,6 +1,6 @@
+#include "GetInfo.h"
 #include <sys/ioctl.h>
 #include <termios.h>
-
 // ================= 콘솔 제어 문자열과 매크로 =================
 #define CURSOR_UP "\033[A"
 #define CURSOR_DOWN "\033[B"
@@ -9,6 +9,7 @@
 #define COLOR_RED "\033[31m"
 #define COLOR_YELLOW "\033[33m"
 #define COLOR_BLUE "\033[34m"
+#define COLOR_PURPLE "\033[35m"
 #define COLOR_RESET "\033[0m"
 #define RESET_ALL "\033[0m"
 #define BOLD "\033[1m"
@@ -38,4 +39,5 @@ int printSpec(char *cpuName, char *gpuName,
               char *memSize); // 0: Succeed, 1: Failed
 void *printThread(void *running);
 void setStatusStr();
-int printRequirements(char *serverResponse, int part, char *partName);
+int printRequirements(char *serverResponse, int part, Info info);
+char ***csvParsing(char *originalStr);

@@ -11,17 +11,17 @@ import (
 )
 
 type Game struct {
-	Name              string `json:"name"`
-	MinimumCPU        string `json:"minimumCpu"`
-	MinimumCPUScore   int    `json:"minimumCpuScore"`
-	MinimumGPU        string `json:"minimumGpu"`
-	MinimumGPUScore   int    `json:"minimumGpuScore"`
-	MinimumMem        int    `json:"minimumMem"`
-	RecommendCPU      string `json:"recommendCpu"`
-	RecommendCPUScore int    `json:"recommendCpuScore"`
-	RecommendGPU      string `json:"recommendGpu"`
-	RecommendGPUScore int    `json:"recommendGpuScore"`
-	RecommendMem      int    `json:"recommendMem"`
+	Name              string  `json:"name"`
+	MinimumCPU        string  `json:"minimumCpu"`
+	MinimumCPUScore   int     `json:"minimumCpuScore"`
+	MinimumGPU        string  `json:"minimumGpu"`
+	MinimumGPUScore   int     `json:"minimumGpuScore"`
+	MinimumMem        float64 `json:"minimumMem"`
+	RecommendCPU      string  `json:"recommendCpu"`
+	RecommendCPUScore int     `json:"recommendCpuScore"`
+	RecommendGPU      string  `json:"recommendGpu"`
+	RecommendGPUScore int     `json:"recommendGpuScore"`
+	RecommendMem      float64 `json:"recommendMem"`
 }
 
 type GameFinder struct {
@@ -189,7 +189,7 @@ func (gameFinder *GameFinder) getGpuId(gpuName string) int {
 	return id
 }
 
-func (gameFinder *GameFinder) CheckMemRun(memSize int, game Game) int {
+func (gameFinder *GameFinder) CheckMemRun(memSize float64, game Game) int {
 	if memSize < game.MinimumMem {
 		return 0
 	} else if memSize < game.RecommendMem {

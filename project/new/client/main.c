@@ -18,6 +18,10 @@ size_t cpuCallback(char *, size_t, size_t, void *);
 size_t gpuCallback(char *, size_t, size_t, void *);
 size_t memCallback(char *, size_t, size_t, void *);
 
+Info cpuInfo;
+Info gpuInfo;
+Info memInfo;
+
 int main() {
   extern int step;
   extern int selectedGame;
@@ -52,17 +56,16 @@ int main() {
   printRunning = 0;
   pthread_join(print, NULL);
   printf("q inputed... Exiting\n");
-  pthread_join(mainFunc, NULL);
+  pthread_cancel(mainFunc);
   sleep(3);
   RELEASE_CONSOLE();
   tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
 void *mainFuncThread() {
   // step 0
-
-  Info cpuInfo = GetCpuInfo();
-  Info gpuInfo = GetGpuInfo();
-  Info memInfo = GetMemoryInfo();
+  cpuInfo = GetCpuInfo();
+  gpuInfo = GetGpuInfo();
+  memInfo = GetMemoryInfo();
   if (printSpec(cpuInfo.info, "TEST GPU", memInfo.info)) {
     fprintf(stdin, "q");
   }
@@ -74,13 +77,15 @@ void *mainFuncThread() {
   char gameMemUrl[200];
 
   sprintf(gameListUrl, "%s/gamelist", SERVER_URL);
-  printf("Game List URL: %s\n", gameListUrl); //이거 없으니까 이유는 모르겠으나 아래 NewRequest에 잘못된 URL을 전송... 혹시 sprintf 비동기인가?
+  printf("Game List URL: %s\n",
+         gameListUrl); // 이거 없으니까 이유는 모르겠으나 아래 NewRequest에
+                       // 잘못된 URL을 전송... 혹시 sprintf 비동기인가?
   Request req = NewRequest(gameListUrl, "", NULL, GET, makeGameListBuffer);
   pthread_join(req.RequestThread, NULL);
   sprintf(gameCpuUrl, "%s/cpucheck/%d?cpu=%s", SERVER_URL, selectedGame + 1,
           cpuInfo.info);
   sprintf(gameGpuUrl, "%s/gpucheck/%d?gpu=%s", SERVER_URL, selectedGame + 1,
-          "NVIDIA GeForce GTX 660");
+          gpuInfo.info);
   sprintf(gameMemUrl, "%s/memcheck/%d?mem=%s", SERVER_URL, selectedGame + 1,
           memInfo.info);
 
@@ -96,7 +101,7 @@ void *mainFuncThread() {
   pthread_join(cpuScore.RequestThread, NULL);
   pthread_join(gpuScore.RequestThread, NULL);
   pthread_join(memScore.RequestThread, NULL);
-  // sleep(1000);
+  sleep(1000);
   return 0;
 }
 
@@ -108,7 +113,7 @@ size_t cpuCallback(char *data, size_t size, size_t nmamb, void *clientp) {
   memcpy(&(mem->Response[mem->Size]), data, realSize);
   mem->Size += realSize;
   mem->Response[mem->Size] = 0;
-  printRequirements(mem->Response, 0, "CPU");
+  printRequirements(mem->Response, 0, cpuInfo);
   return realSize;
 }
 size_t gpuCallback(char *data, size_t size, size_t nmamb, void *clientp) {
@@ -119,7 +124,7 @@ size_t gpuCallback(char *data, size_t size, size_t nmamb, void *clientp) {
   memcpy(&(mem->Response[mem->Size]), data, realSize);
   mem->Size += realSize;
   mem->Response[mem->Size] = 0;
-  printRequirements(mem->Response, 1, "GPU");
+  printRequirements(mem->Response, 1, gpuInfo);
   return realSize;
 }
 size_t memCallback(char *data, size_t size, size_t nmamb, void *clientp) {
@@ -130,6 +135,6 @@ size_t memCallback(char *data, size_t size, size_t nmamb, void *clientp) {
   memcpy(&(mem->Response[mem->Size]), data, realSize);
   mem->Size += realSize;
   mem->Response[mem->Size] = 0;
-  printRequirements(mem->Response, 2, "Memory");
+  printRequirements(mem->Response, 2, memInfo);
   return realSize;
 }

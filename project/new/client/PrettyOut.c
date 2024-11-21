@@ -1,5 +1,5 @@
 #include "Prettyout.h"
-
+#include "GetInfo.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -52,7 +52,7 @@ void *printThread(void *running) { // main에서 변수 변경하도록
     CURSOR_MOVE(1, 1);
     if (step == 1) {
       printf("Selected Game: %d (Press arrow keys and ENTER to select)\n",
-             selectedGame);
+             selectedGame + 1);
       for (int i = 0; gameListBuffer[i][0] != 0 && i < w.ws_row; i++) {
         i == selectedGame ? printf("%s%s%s%s\n", UNDERLINE, BOLD,
                                    gameListBuffer[i], RESET_ALL)
@@ -94,21 +94,41 @@ int printSpec(char *cpuName, char *gpuName, char *memSize) {
 }
 
 int printedRequirements = 0;
-int printRequirements(char* serverResponse, int part, char* partName) { //양식: 실행가능성\n최소CPU,최소GPU,최소메모리\n권장CPU,권장GPU,권장메모리 / 0: CPU, 1: GPU, 2: Memory
-  char token = serverResponse[0];
-  if (token == '0') {
-    sprintf(consoleBuffer[6 + part], "%sRequirements: %s%s", COLOR_RED, partName, COLOR_RESET);
-  } else if(token == '1') {
-    sprintf(consoleBuffer[6 + part], "%sRequirements: %s%s", COLOR_YELLOW, partName, COLOR_RESET);
-  } else {
-    sprintf(consoleBuffer[6 + part], "%sRequirements: %s%s", COLOR_BLUE, partName, COLOR_RESET);
-  }
+int printRequirements(
+    char *serverResponse, int part,
+    Info
+        info) { // 양식:
+                // 실행가능성\n최소CPU,최소GPU,최소메모리\n권장CPU,권장GPU,권장메모리
+                // / 0: CPU, 1: GPU, 2: Memory
   printedRequirements++;
-  if(printedRequirements == 3) {
+
+  fprintf(stderr, "%d: %s Started\n", printedRequirements, info.infoName);
+  char token = serverResponse[0];
+  if (token == '-') {
+    sprintf(consoleBuffer[6 + part], "%s%s: %s is not found in the server!%s",
+            COLOR_PURPLE, info.infoName, info.info, COLOR_RESET);
+  } else {
+    if (!strcmp(info.infoName, "CPU"))
+      fprintf(stderr, "csv\n%s\n", serverResponse);
+    char ***csv = csvParsing(serverResponse);
+
+    if (token == '0') {
+      sprintf(consoleBuffer[6 + part], "%s%s: Cannot run (%s < %s)%s",
+              COLOR_RED, info.infoName, info.info, csv[1][part], COLOR_RESET);
+    } else if (token == '1') {
+      sprintf(consoleBuffer[6 + part], "%s%s: Not Recommended (%s < %s)%s",
+              COLOR_YELLOW, info.infoName, info.info, csv[2][part],
+              COLOR_RESET);
+    } else if (token == '2') {
+      sprintf(consoleBuffer[6 + part], "%s%s: OK! (%s > %s)%s", COLOR_BLUE,
+              info.infoName, info.info, csv[2][part], COLOR_RESET);
+    }
+    fprintf(stderr, "%s: strcpy done!\n", info.infoName);
+  }
+  if (printedRequirements == 3) {
     step = 3;
   }
   return 0;
-
 }
 char *strMultiply(char *str, int num) {
   int strLen = strlen(str);
@@ -134,4 +154,40 @@ void setStatusStr() {
     strcpy(consoleBuffer[0], "Status: DONE! Press 'q' to exit");
     break;
   }
+}
+char ***csvParsing(char *originalStr) {
+  /*
+   * 1
+   *  MinimumCPU,MinimumGpu,MinimumMem
+   *  RecommendCPU,RecommendGPU,RecommendMem
+   * */
+  char ***csv = malloc(sizeof(char **) * 3);
+  for (int i = 0; i < 3; i++) {
+    csv[i] = malloc(sizeof(char *) * 3);
+    for (int j = 0; j < 3; j++) {
+      csv[i][j] = calloc(sizeof(char), 100);
+    }
+  }
+
+  char temp[100] = {0};
+  int j = 0, row = 0, column = 0;
+  for (int i = 0; originalStr[i]; i++, j++) {
+    if (originalStr[i] == ',') {
+      temp[j] = 0;
+      j = -1;
+      strcpy(csv[row][column], temp);
+      column++;
+    } else if (originalStr[i] == '\n') {
+      temp[j] = 0;
+      j = -1;
+      strcpy(csv[row][column], temp);
+      column = 0;
+      row++;
+    } else {
+      temp[j] = originalStr[i];
+    }
+  }
+  temp[j] = 0;
+  strcpy(csv[row][column], temp);
+  return csv;
 }
