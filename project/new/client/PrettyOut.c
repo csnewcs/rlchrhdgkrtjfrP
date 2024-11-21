@@ -93,7 +93,7 @@ int printSpec(char *cpuName, char *gpuName, char *memSize) {
   return 0;
 }
 
-int printedRequirements = 0;
+volatile int printedRequirements = 0;
 int printRequirements(
     char *serverResponse, int part,
     Info
