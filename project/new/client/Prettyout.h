@@ -38,6 +38,7 @@ char *strMultiply(char *str, int num);
 int printSpec(char *cpuName, char *gpuName,
               char *memSize); // 0: Succeed, 1: Failed
 void *printThread(void *running);
+void setupRequirements();
+void printRequirements(char *serverResponse, int part, Info info);
 void setStatusStr();
-int printRequirements(char *serverResponse, int part, Info info);
 char ***csvParsing(char *originalStr);

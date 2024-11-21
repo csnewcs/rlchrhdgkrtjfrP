@@ -94,8 +94,13 @@ int printSpec(char *cpuName, char *gpuName, char *memSize) {
 }
 
 volatile int printedRequirements = 0;
-int printRequirements(
-    char *serverResponse, int part,
+void setupRequirements() {
+  printedRequirements = 0;
+  strcpy(consoleBuffer[6], "CPU: Checking...");
+  strcpy(consoleBuffer[7], "GPU: Checking...");
+  strcpy(consoleBuffer[8], "Memory: Checking...");
+}
+void printRequirements(char *serverResponse, int part,
     Info
         info) { // 양식:
                 // 실행가능성\n최소CPU,최소GPU,최소메모리\n권장CPU,권장GPU,권장메모리
@@ -128,8 +133,9 @@ int printRequirements(
   if (printedRequirements == 3) {
     step = 3;
   }
-  return 0;
 }
+
+
 char *strMultiply(char *str, int num) {
   int strLen = strlen(str);
   char *mult = calloc(sizeof(char), strLen * num);

@@ -70,7 +70,7 @@ void *mainFuncThread() {
     fprintf(stdin, "q");
   }
   // step 1
-  const char *SERVER_URL = "http://localhost:8080";
+  const char *SERVER_URL = "http://kakao.csnewcs.dev:8080";
   char gameListUrl[200];
   char gameCpuUrl[200];
   char gameGpuUrl[200];
@@ -93,9 +93,8 @@ void *mainFuncThread() {
     usleep(1000); // 1ms
   }
   // step 2
-
+  setupRequirements();
   Request cpuScore = NewRequest(gameCpuUrl, "", NULL, GET, cpuCallback);
-
   Request gpuScore = NewRequest(gameGpuUrl, "", NULL, GET, gpuCallback);
   Request memScore = NewRequest(gameMemUrl, "", NULL, GET, memCallback);
   pthread_join(cpuScore.RequestThread, NULL);
