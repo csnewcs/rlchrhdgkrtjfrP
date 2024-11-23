@@ -38,7 +38,7 @@ Info GetMemoryInfo() {
   return info;
 }
 Info GetGpuInfo() {
-  const char *COMMAND = "cat ./lshw"; // lshw -C display -short
+  const char *COMMAND = "lshw -C display -short"; // lshw -C display -short
   char* result = getInfo(COMMAND);
   char *line = strtok(result, "\n");
   line = strtok(NULL, "\n");

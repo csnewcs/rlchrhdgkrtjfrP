@@ -30,7 +30,7 @@ extern struct winsize w;
 extern struct termios term;
 extern int step; // 0: 스펙 확인, 1: 게임 리스트 가져오기 완료 후 선택, 2: 게임
                  // 상태 확인, 3: 끝
-extern int selectedGame;
+extern volatile int selectedGame;
 extern int gameCount;
 // ================= 기능 함수 헤더 =================
 void initConsole();

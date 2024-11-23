@@ -24,7 +24,7 @@ Info memInfo;
 
 int main() {
   extern int step;
-  extern int selectedGame;
+  // extern volatile int selectedGame;
   extern int gameCount;
   initConsole();
   InitCurl();
@@ -57,7 +57,7 @@ int main() {
   pthread_join(print, NULL);
   printf("q inputed... Exiting\n");
   pthread_cancel(mainFunc);
-  sleep(3);
+  sleep(1);
   RELEASE_CONSOLE();
   tcsetattr(STDIN_FILENO, TCSANOW, &term);
 }
@@ -66,8 +66,8 @@ void *mainFuncThread() {
   cpuInfo = GetCpuInfo();
   gpuInfo = GetGpuInfo();
   memInfo = GetMemoryInfo();
-  if (printSpec(cpuInfo.info, "TEST GPU", memInfo.info)) {
-    fprintf(stdin, "q");
+  if (printSpec(cpuInfo.info,gpuInfo.info, memInfo.info)) {
+    return NULL;
   }
   // step 1
   const char *SERVER_URL = "http://kakao.csnewcs.dev:8080";
@@ -77,21 +77,19 @@ void *mainFuncThread() {
   char gameMemUrl[200];
 
   sprintf(gameListUrl, "%s/gamelist", SERVER_URL);
-  printf("Game List URL: %s\n",
-         gameListUrl); // 이거 없으니까 이유는 모르겠으나 아래 NewRequest에
+  printf("Game List URL: %s\n",gameListUrl); // 이거 없으니까 이유는 모르겠으나 아래 NewRequest에
                        // 잘못된 URL을 전송... 혹시 sprintf 비동기인가?
   Request req = NewRequest(gameListUrl, "", NULL, GET, makeGameListBuffer);
   pthread_join(req.RequestThread, NULL);
-  sprintf(gameCpuUrl, "%s/cpucheck/%d?cpu=%s", SERVER_URL, selectedGame + 1,
-          cpuInfo.info);
-  sprintf(gameGpuUrl, "%s/gpucheck/%d?gpu=%s", SERVER_URL, selectedGame + 1,
-          gpuInfo.info);
-  sprintf(gameMemUrl, "%s/memcheck/%d?mem=%s", SERVER_URL, selectedGame + 1,
-          memInfo.info);
-
   while (step != 2) {
     usleep(1000); // 1ms
   }
+  sprintf(gameCpuUrl, "%s/cpucheck/%d?cpu=%s", SERVER_URL, selectedGame,
+          cpuInfo.info);
+  sprintf(gameGpuUrl, "%s/gpucheck/%d?gpu=%s", SERVER_URL, selectedGame,
+          gpuInfo.info);
+  sprintf(gameMemUrl, "%s/memcheck/%d?mem=%s", SERVER_URL, selectedGame,
+          memInfo.info);
   // step 2
   setupRequirements();
   Request cpuScore = NewRequest(gameCpuUrl, "", NULL, GET, cpuCallback);
@@ -100,7 +98,6 @@ void *mainFuncThread() {
   pthread_join(cpuScore.RequestThread, NULL);
   pthread_join(gpuScore.RequestThread, NULL);
   pthread_join(memScore.RequestThread, NULL);
-  sleep(1000);
   return 0;
 }
 
