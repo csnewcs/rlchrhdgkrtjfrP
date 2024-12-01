@@ -35,6 +35,8 @@ func getGame(gameId string) (Game, error) {
 func checkCpu(c echo.Context) error {
 	name := c.QueryParam("cpu")
 	gameId := c.Param("game")
+	fmt.Println(gameId)
+
 	if name == "" {
 		return c.String(400, "-1\nNo cpu name")
 	}
