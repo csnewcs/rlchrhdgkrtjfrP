@@ -31,7 +31,7 @@ int main() {
   int printRunning = 1;
   pthread_t print;
   pthread_t mainFunc;
-  pthread_create(&print, NULL, printThread, &printRunning);
+  // pthread_create(&print, NULL, printThread, &printRunning);
   pthread_create(&mainFunc, NULL, mainFuncThread, NULL);
   char input;
   while (1) {

@@ -39,7 +39,10 @@ Info GetMemoryInfo() {
 }
 Info GetGpuInfo() {
   const char *COMMAND = "cat ./lshw";
-  Info info = {"GPU", "NVIDIA Geforce GTX 660"};
+  Info info = {"GPU", ""};
+  char *gpuInfo = getInfo(COMMAND);
+  char *gpuNameLine = getLine(gpuInfo, "       product: ");
+  fprintf(stderr, "GPU: %s\n", gpuNameLine);
   return info;
 }
 char *getInfo(char *command) {
