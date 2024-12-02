@@ -38,11 +38,31 @@ Info GetMemoryInfo() {
   return info;
 }
 Info GetGpuInfo() {
+<<<<<<< HEAD
   const char *COMMAND = "cat ./lshw";
   Info info = {"GPU", ""};
   char *gpuInfo = getInfo(COMMAND);
   char *gpuNameLine = getLine(gpuInfo, "       product: ");
   fprintf(stderr, "GPU: %s\n", gpuNameLine);
+=======
+  const char *COMMAND = "lshw -C display -short"; // lshw -C display -short
+  char* result = getInfo(COMMAND);
+  char *line = strtok(result, "\n");
+  line = strtok(NULL, "\n");
+  line = strtok(NULL, "\n"); // 1줄(헤더), 2줄(구분자) 건너뜀
+  // //0/100/1.1/0/0/0                    display     Navi 14 [Radeon RX 5500/5500M / Pro 5500M]
+  char temp[100] = {0};
+  int length = strlen(line);
+  for(; *line != '[' && length > 0; length--) line++;
+  if(length == 0) return (Info){"GPU", ""};
+  line++;
+  for(int i = 0; line[i] != ']'; i++) {
+    temp[i] = line[i];
+  }
+  char *gpuName = calloc(strlen(temp), sizeof(char));
+  strcpy(gpuName, temp);
+  Info info = {"GPU", gpuName};
+>>>>>>> refs/remotes/origin/master
   return info;
 }
 char *getInfo(char *command) {

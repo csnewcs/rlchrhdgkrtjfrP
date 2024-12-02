@@ -96,9 +96,12 @@ func (gameFinder *GameFinder) CheckCpuRun(cpuScore float64, game Game) int { //0
 }
 
 func (gameFinder *GameFinder) GetCpuScore(cpuName string) float64 {
+	
 	cpuId := strconv.Itoa(gameFinder.getCpuId(cpuName))
+	if(cpuId == "-1") {
+		return -1
+	}
 	url := fmt.Sprintf(gameFinder.apiGetMedianUrl, cpuId, "", "physicsScore")
-	fmt.Println(url)
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:132.0) Gecko/20100101 Firefox/132.0")
 	// sessionCookie := http.Cookie{
@@ -125,12 +128,14 @@ func (gameFinder *GameFinder) GetCpuScore(cpuName string) float64 {
 func (gameFinder *GameFinder) getCpuId(cpuName string) int {
 	url := fmt.Sprintf(gameFinder.apiGetCpuName, cpuName)
 	url = strings.ReplaceAll(url, " ", "%20")
-	fmt.Println(url)
 	result, _ := http.Get(url)
 	var data []Cpu3dMark
 	str, _ := io.ReadAll(result.Body)
 	fmt.Printf("%s\n", str)
 	json.Unmarshal(str, &data)
+	if len(data) == 0 {
+		return -1
+	}
 	for _, value := range data {
 		if value.Label == cpuName {
 			id, _ := strconv.Atoi(value.Id)
@@ -151,6 +156,9 @@ func (gameFinder *GameFinder) CheckGpuRun(gpuScore float64, game Game) int {
 }
 func (gameFinder *GameFinder) GetGpuScore(gpuName string) float64 {
 	gpuId := strconv.Itoa(gameFinder.getGpuId(gpuName))
+	if(gpuId == "-1") {
+		return -1
+	}
 	url := fmt.Sprintf(gameFinder.apiGetMedianUrl, "", gpuId, "graphicsScore")
 	fmt.Println(url)
 	req, _ := http.NewRequest("GET", url, nil)
@@ -179,6 +187,9 @@ func (gameFinder *GameFinder) getGpuId(gpuName string) int {
 	str, _ := io.ReadAll(result.Body)
 	fmt.Printf("%s\n", str)
 	json.Unmarshal(str, &data)
+	if len(data) == 0 {
+		return -1
+	}
 	for _, value := range data {
 		if value.Label == gpuName {
 			id, _ := strconv.Atoi(value.Id)

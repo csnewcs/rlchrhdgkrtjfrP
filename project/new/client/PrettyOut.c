@@ -16,7 +16,7 @@ struct winsize w;
 struct termios term;
 
 int step = 0;
-int selectedGame = 0;
+volatile int selectedGame = 0;
 int gameCount = 0;
 void initConsole() {
   step = 0;
@@ -51,8 +51,8 @@ void *printThread(void *running) { // main에서 변수 변경하도록
     ERASE_CONSOLE();
     CURSOR_MOVE(1, 1);
     if (step == 1) {
-      printf("Selected Game: %d (Press arrow keys and ENTER to select)\n",
-             selectedGame + 1);
+      printf("Selected Game: %s (Press arrow keys and ENTER to select)\n",
+             gameListBuffer[selectedGame]);
       for (int i = 0; gameListBuffer[i][0] != 0 && i < w.ws_row; i++) {
         i == selectedGame ? printf("%s%s%s%s\n", UNDERLINE, BOLD,
                                    gameListBuffer[i], RESET_ALL)
@@ -68,14 +68,14 @@ void *printThread(void *running) { // main에서 변수 변경하도록
 
 int printSpec(char *cpuName, char *gpuName, char *memSize) {
   if (cpuName[0] == '\0') {
-    sprintf(consoleBuffer[2], "%sCPU: Could not get CPU information! Exit...%s",
+    sprintf(consoleBuffer[2], "%sCPU: Could not get CPU information! Press 'q' to exit...%s",
             COLOR_RED, COLOR_RESET);
     return 1;
   } else {
     sprintf(consoleBuffer[2], "CPU: %s", cpuName);
   }
   if (gpuName[0] == '\0') {
-    sprintf(consoleBuffer[3], "%sGPU: Could not get GPU information! Exit...%s",
+    sprintf(consoleBuffer[3], "%sGPU: Could not get GPU information! Press 'q' to exit...%s",
             COLOR_RED, COLOR_RESET);
     return 1;
   } else {
@@ -83,7 +83,7 @@ int printSpec(char *cpuName, char *gpuName, char *memSize) {
   }
   if (memSize == 0) {
     sprintf(consoleBuffer[4],
-            "%sMemory: Could not get Memory information! Exit...%s", COLOR_RED,
+            "%sMemory: Could not get Memory information! Press 'q' to exit...%s", COLOR_RED,
             COLOR_RESET);
     return 1;
   } else {
@@ -107,10 +107,9 @@ void printRequirements(char *serverResponse, int part,
                 // / 0: CPU, 1: GPU, 2: Memory
   printedRequirements++;
 
-  fprintf(stderr, "%d: %s Started\n", printedRequirements, info.infoName);
   char token = serverResponse[0];
   if (token == '-') {
-    sprintf(consoleBuffer[6 + part], "%s%s: %s is not found in the server!%s",
+    sprintf(consoleBuffer[6 + part], "%s%s: \"%s\" is not found in the server!%s",
             COLOR_PURPLE, info.infoName, info.info, COLOR_RESET);
   } else {
     if (!strcmp(info.infoName, "CPU"))
